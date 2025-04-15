@@ -76,35 +76,47 @@
   -->
 
   <script>
-    // Step 1: Get references to the form, input box, and task list
-    const taskForm = document.getElementById('task-form'); // The form element
-    const taskInput = document.getElementById('task-input'); // The input box
-    const taskList = document.getElementById('task-list'); // The list where tasks will be shown
-  
-    // Step 2: Add an event listener to run when the form is submitted
+    // Step 1: Get references to the form, input, and list
+    const taskForm = document.getElementById('task-form');
+    const taskInput = document.getElementById('task-input');
+    const taskList = document.getElementById('task-list');
+
+    // Step 2: Listen for form submission
     taskForm.addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevents the page from reloading when the form is submitted
-  
-      const taskText = taskInput.value.trim(); // Get the text from the input box and remove extra spaces
-  
-      if (taskText === '') {
-        return; // If the box is empty, stop here (don't add an empty task)
-      }
-  
-      // Step 3: Create a new <li> element to hold the task
-      const taskItem = document.createElement('li'); // Create an <li> tag
-      taskItem.textContent = taskText; // Set the text inside the <li> to be the task
-  
-      // Step 4: Style the task item with Tailwind classes
-      taskItem.className = 'bg-white p-3 rounded shadow'; // White background, padding, rounded corners, and shadow
-  
-      // Step 5: Add the new task to the list
-      taskList.appendChild(taskItem); // Puts the <li> into the <ul>
-  
-      // Step 6: Clear the input box for the next task
-      taskInput.value = ''; // Resets the box to empty
+      event.preventDefault(); // Prevent page reload
+
+      const taskText = taskInput.value.trim(); // Get input text
+
+      if (taskText === '') return; // Do nothing if input is empty
+
+      // Step 3: Create task <li> element
+      const taskItem = document.createElement('li');
+      taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
+
+      // Step 4: Create a <span> to hold the task text
+      const taskSpan = document.createElement('span');
+      taskSpan.textContent = taskText;
+
+      // Step 5: Create a delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '❌'; // Button shows an "X"
+      deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+
+      // Step 6: Add event listener to delete the task when clicked
+      deleteBtn.addEventListener('click', function () {
+        taskItem.remove(); // Remove the whole <li> from the list
+      });
+
+      // Step 7: Add the task text and delete button to the <li>
+      taskItem.appendChild(taskSpan);     // Add the task text
+      taskItem.appendChild(deleteBtn);    // Add the delete button
+
+      // Step 8: Add the <li> to the list
+      taskList.appendChild(taskItem);
+
+      // Step 9: Clear the input box
+      taskInput.value = '';
     });
   </script>
-
 </body>
 </html>
