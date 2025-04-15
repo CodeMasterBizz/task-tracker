@@ -94,8 +94,19 @@
       taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
 
       // Step 4: Create a <span> to hold the task text
+      // Create a <span> for the task text
       const taskSpan = document.createElement('span');
       taskSpan.textContent = taskText;
+      taskSpan.title = 'Click to mark complete'; // Tooltip hint for user
+      taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors'; // Make it look clickable
+
+      // When the user clicks, toggle completed styling
+        taskSpan.addEventListener('click', function () {
+        taskSpan.classList.toggle('line-through');   // Strike-through when done
+        taskSpan.classList.toggle('text-gray-400');  // Make it look dim
+        taskSpan.classList.toggle('italic');         // Optional style
+      });
+
 
       // Step 5: Create a delete button
       const deleteBtn = document.createElement('button');
@@ -107,12 +118,21 @@
         taskItem.remove(); // Remove the whole <li> from the list
       });
 
-      // Step 7: Add the task text and delete button to the <li>
-      taskItem.appendChild(taskSpan);     // Add the task text
-      taskItem.appendChild(deleteBtn);    // Add the delete button
+// Step 7: Add the task text to the <li>
+  taskItem.appendChild(taskSpan);     // Add the task text
 
-      // Step 8: Add the <li> to the list
-      taskList.appendChild(taskItem);
+// Step 7.5: Add a timestamp showing when the task was created
+const timestamp = document.createElement('small'); // Create a <small> element
+const now = new Date(); // Get current time
+timestamp.textContent = `Added: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+timestamp.className = 'text-sm text-gray-500 mt-1 block'; // Style it nicely
+taskItem.appendChild(timestamp); // Add it under the task text
+
+taskItem.appendChild(deleteBtn);    // Add the delete button
+
+// Step 8: Add the <li> to the list
+taskList.appendChild(taskItem);
+
 
       // Step 9: Clear the input box
       taskInput.value = '';
