@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta information for character encoding and responsiveness -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Title of the page shown in browser tab -->
+  <title>Task Tracker</title>
+
+  <!-- Link to Tailwind CSS CDN for utility-first styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans p-6">
+  <!-- Body styling:
+       - Light gray background (bg-gray-100)
+       - Dark gray text color (text-gray-900)
+       - Sans-serif font (font-sans)
+       - Padding around the body (p-6)
+  -->
+
+  <!-- Header: Main title of the page -->
+  <h1 class="text-3xl font-bold mb-4">📝 Task Tracker</h1>
+  <!-- Styling:
+       - 3xl font size
+       - Bold text
+       - Margin bottom to give space below (mb-4)
+  -->
+
+  <!-- Task Input Form -->
+  <form id="task-form" class="flex items-center gap-2 mb-6">
+    <!-- Form container with:
+         - Flex layout (flex)
+         - Vertically aligned items (items-center)
+         - Gap between input and button (gap-2)
+         - Margin below the form (mb-6)
+    -->
+
+    <!-- Task input box -->
+    <input 
+      type="text" 
+      id="task-input" 
+      placeholder="Enter a task..." 
+      class="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    <!-- Input field:
+         - flex-1: expands to fill available space
+         - px-4 py-2: padding inside
+         - border: light gray border
+         - rounded-md: slightly rounded corners
+         - shadow-sm: soft shadow
+         - focus:outline-none: removes default outline
+         - focus:ring-2 & focus:ring-blue-500: blue glow when clicked
+    -->
+
+    <!-- Submit button -->
+    <button 
+      type="submit" 
+      class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+    >
+      Add
+    </button>
+    <!-- Button styling:
+         - Blue background (bg-blue-600)
+         - White text
+         - Padding
+         - Rounded corners
+         - Darker blue on hover
+    -->
+  </form>
+
+  <!-- Empty list where tasks will appear -->
+  <ul id="task-list" class="space-y-2"></ul>
+  <!-- List styling:
+       - space-y-2: adds vertical space between each task item
+  -->
+
+  <script>
+    // Step 1: Get references to the form, input box, and task list
+    const taskForm = document.getElementById('task-form'); // The form element
+    const taskInput = document.getElementById('task-input'); // The input box
+    const taskList = document.getElementById('task-list'); // The list where tasks will be shown
+  
+    // Step 2: Add an event listener to run when the form is submitted
+    taskForm.addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevents the page from reloading when the form is submitted
+  
+      const taskText = taskInput.value.trim(); // Get the text from the input box and remove extra spaces
+  
+      if (taskText === '') {
+        return; // If the box is empty, stop here (don't add an empty task)
+      }
+  
+      // Step 3: Create a new <li> element to hold the task
+      const taskItem = document.createElement('li'); // Create an <li> tag
+      taskItem.textContent = taskText; // Set the text inside the <li> to be the task
+  
+      // Step 4: Style the task item with Tailwind classes
+      taskItem.className = 'bg-white p-3 rounded shadow'; // White background, padding, rounded corners, and shadow
+  
+      // Step 5: Add the new task to the list
+      taskList.appendChild(taskItem); // Puts the <li> into the <ul>
+  
+      // Step 6: Clear the input box for the next task
+      taskInput.value = ''; // Resets the box to empty
+    });
+  </script>
+
+</body>
+</html>
