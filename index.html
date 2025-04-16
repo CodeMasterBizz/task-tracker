@@ -76,6 +76,21 @@
   -->
 
   <script>
+    // 🍪 Save the current task list into the browser's memory
+function saveTasks() {
+  const tasks = [];
+
+  taskList.querySelectorAll('li').forEach(li => {
+    const span = li.querySelector('span');
+    tasks.push({
+      title: span.textContent,
+      completed: span.classList.contains('line-through')
+    });
+  });
+
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
     // Step 1: Get references to the form, input, and list
     const taskForm = document.getElementById('task-form');
     const taskInput = document.getElementById('task-input');
@@ -132,6 +147,47 @@ taskItem.appendChild(deleteBtn);    // Add the delete button
 
 // Step 8: Add the <li> to the list
 taskList.appendChild(taskItem);
+saveTasks(); // 🧠 Save the task after adding
+// 🍪 Load tasks from the browser's cookie jar (localStorage)
+function loadTasks() {
+  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  savedTasks.forEach(task => {
+    const taskItem = document.createElement('li');
+    taskItem.className = 'flex items-center justify-between py-2 border-b';
+
+    const taskSpan = document.createElement('span');
+    taskSpan.textContent = task.title;
+    taskSpan.className = 'cursor-pointer';
+
+    // ✅ If it was completed before, mark it
+    if (task.completed) {
+      taskSpan.classList.add('line-through', 'text-gray-500');
+    }
+
+    // 🖱️ Let user click to toggle complete
+    taskSpan.addEventListener('click', function () {
+      taskSpan.classList.toggle('line-through');
+      taskSpan.classList.toggle('text-gray-500');
+      saveTasks(); // Save the new status!
+    });
+
+    // ❌ Add delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '❌';
+    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+    deleteBtn.addEventListener('click', function () {
+      taskItem.remove();
+      saveTasks(); // Save the change
+    });
+
+    // 📦 Put the span and button into the list item
+    taskItem.appendChild(taskSpan);
+    taskItem.appendChild(deleteBtn);
+    taskList.appendChild(taskItem);
+  });
+}
+
 
 
       // Step 9: Clear the input box
@@ -176,6 +232,9 @@ taskList.appendChild(taskItem);
       .catch(error => {
         console.error('Error fetching tasks:', error);
       });
+      // 🚀 Load saved tasks right when the page loads
+loadTasks();
+
   </script>
 </body>
 </html>
