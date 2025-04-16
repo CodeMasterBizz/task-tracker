@@ -105,6 +105,7 @@
         taskSpan.classList.toggle('line-through');   // Strike-through when done
         taskSpan.classList.toggle('text-gray-400');  // Make it look dim
         taskSpan.classList.toggle('italic');         // Optional style
+        });
 
 
       // Step 5: Create a delete button
@@ -137,7 +138,7 @@ taskList.appendChild(taskItem);
       taskInput.value = '';
     });
 
-    // Step 10: Fetch tasks from the fake API and display them
+    // Fetch tasks from the fake API (moved outside the form event listener)
     fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
       .then(response => response.json())
       .then(data => {
@@ -175,7 +176,6 @@ taskList.appendChild(taskItem);
       .catch(error => {
         console.error('Error fetching tasks:', error);
       });
-  });
   </script>
 </body>
 </html>
