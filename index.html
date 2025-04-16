@@ -79,17 +79,63 @@
     // 🍪 Save the current task list into the browser's memory
 function saveTasks() {
   const tasks = [];
-
   taskList.querySelectorAll('li').forEach(li => {
     const span = li.querySelector('span');
+    const timestamp = li.querySelector('small');
     tasks.push({
       title: span.textContent,
-      completed: span.classList.contains('line-through')
+      completed: span.classList.contains('line-through'),
+      timestamp: timestamp ? timestamp.textContent : `Added: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
     });
   });
-
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
+
+// 🍪 Load tasks from the browser's cookie jar (localStorage)
+function loadTasks() {
+  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  savedTasks.forEach(task => {
+    const taskItem = document.createElement('li');
+    taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
+
+    const taskSpan = document.createElement('span');
+    taskSpan.textContent = task.title;
+    taskSpan.title = 'Click to mark complete';
+    taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
+
+    if (task.completed) {
+      taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
+    }
+
+    taskSpan.addEventListener('click', function () {
+      taskSpan.classList.toggle('line-through');
+      taskSpan.classList.toggle('text-gray-400');
+      taskSpan.classList.toggle('italic');
+      saveTasks();
+    });
+
+    const timestamp = document.createElement('small');
+    timestamp.textContent = task.timestamp;
+    timestamp.className = 'text-sm text-gray-500 mt-1 block';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '❌';
+    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+    deleteBtn.addEventListener('click', function () {
+      taskItem.remove();
+      saveTasks();
+    });
+
+    taskItem.appendChild(taskSpan);
+    taskItem.appendChild(timestamp);
+    taskItem.appendChild(deleteBtn);
+    taskList.appendChild(taskItem);
+  });
+}
+
+// Move loadTasks() call to the top of the script execution
+document.addEventListener('DOMContentLoaded', loadTasks);
 
     // Step 1: Get references to the form, input, and list
     const taskForm = document.getElementById('task-form');
@@ -131,6 +177,7 @@ function saveTasks() {
       // Step 6: Add event listener to delete the task when clicked
       deleteBtn.addEventListener('click', function () {
         taskItem.remove(); // Remove the whole <li> from the list
+        saveTasks(); // Save the change
       });
 
 // Step 7: Add the task text to the <li>
@@ -148,93 +195,10 @@ taskItem.appendChild(deleteBtn);    // Add the delete button
 // Step 8: Add the <li> to the list
 taskList.appendChild(taskItem);
 saveTasks(); // 🧠 Save the task after adding
-// 🍪 Load tasks from the browser's cookie jar (localStorage)
-function loadTasks() {
-  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
-  savedTasks.forEach(task => {
-    const taskItem = document.createElement('li');
-    taskItem.className = 'flex items-center justify-between py-2 border-b';
-
-    const taskSpan = document.createElement('span');
-    taskSpan.textContent = task.title;
-    taskSpan.className = 'cursor-pointer';
-
-    // ✅ If it was completed before, mark it
-    if (task.completed) {
-      taskSpan.classList.add('line-through', 'text-gray-500');
-    }
-
-    // 🖱️ Let user click to toggle complete
-    taskSpan.addEventListener('click', function () {
-      taskSpan.classList.toggle('line-through');
-      taskSpan.classList.toggle('text-gray-500');
-      saveTasks(); // Save the new status!
-    });
-
-    // ❌ Add delete button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '❌';
-    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
-    deleteBtn.addEventListener('click', function () {
-      taskItem.remove();
-      saveTasks(); // Save the change
-    });
-
-    // 📦 Put the span and button into the list item
-    taskItem.appendChild(taskSpan);
-    taskItem.appendChild(deleteBtn);
-    taskList.appendChild(taskItem);
-  });
-}
-
-
 
       // Step 9: Clear the input box
       taskInput.value = '';
     });
-
-    // Fetch tasks from the fake API (moved outside the form event listener)
-    fetch('https://jsonplaceholder.typicode.com/todos?_limit=5')
-      .then(response => response.json())
-      .then(data => {
-        data.forEach(task => {
-          const taskItem = document.createElement('li');
-          taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
-
-          const taskSpan = document.createElement('span');
-          taskSpan.textContent = task.title;
-          taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
-
-          if (task.completed) {
-            taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
-          }
-
-          taskSpan.addEventListener('click', function () {
-            taskSpan.classList.toggle('line-through');
-            taskSpan.classList.toggle('text-gray-400');
-            taskSpan.classList.toggle('italic');
-          });
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.textContent = '❌';
-          deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
-          
-          deleteBtn.addEventListener('click', function () {
-            taskItem.remove();
-          });
-
-          taskItem.appendChild(taskSpan);
-          taskItem.appendChild(deleteBtn);
-          taskList.appendChild(taskItem);
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching tasks:', error);
-      });
-      // 🚀 Load saved tasks right when the page loads
-loadTasks();
-
   </script>
 </body>
 </html>
