@@ -80,137 +80,132 @@
 <!-- Your own Supabase settings -->
 <script src="supabase.js"></script>
 
-<script>
-  // Step 1: Select elements...
-  // your existing task logic
-</script>
-</body>
-</html>
+<script type="module">
+  import { supabase } from './supabase.js';
 
-  <script>
-    // 🍪 Save the current task list into the browser's memory
-function saveTasks() {
-  const tasks = [];
-  taskList.querySelectorAll('li').forEach(li => {
-    const span = li.querySelector('span');
-    const timestamp = li.querySelector('small');
-    tasks.push({
-      title: span.textContent,
-      completed: span.classList.contains('line-through'),
-      timestamp: timestamp ? timestamp.textContent : `Added: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+  // Initialize DOM elements first
+  const taskForm = document.getElementById('task-form');
+  const taskInput = document.getElementById('task-input');
+  const taskList = document.getElementById('task-list');
+
+  // Load tasks when DOM is ready
+  document.addEventListener('DOMContentLoaded', loadTasks);
+
+  function saveTasks() {
+    const tasks = [];
+    taskList.querySelectorAll('li').forEach(li => {
+      const span = li.querySelector('span');
+      const timestamp = li.querySelector('small');
+      tasks.push({
+        title: span.textContent,
+        completed: span.classList.contains('line-through'),
+        timestamp: timestamp ? timestamp.textContent : `Added: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+      });
     });
-  });
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-}
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
 
-// 🍪 Load tasks from the browser's cookie jar (localStorage)
-function loadTasks() {
-  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  function loadTasks() {
+    const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-  savedTasks.forEach(task => {
-    const taskItem = document.createElement('li');
-    taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
-
-    const taskSpan = document.createElement('span');
-    taskSpan.textContent = task.title;
-    taskSpan.title = 'Click to mark complete';
-    taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
-
-    if (task.completed) {
-      taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
-    }
-
-    taskSpan.addEventListener('click', function () {
-      taskSpan.classList.toggle('line-through');
-      taskSpan.classList.toggle('text-gray-400');
-      taskSpan.classList.toggle('italic');
-      saveTasks();
-    });
-
-    const timestamp = document.createElement('small');
-    timestamp.textContent = task.timestamp;
-    timestamp.className = 'text-sm text-gray-500 mt-1 block';
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '❌';
-    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
-    deleteBtn.addEventListener('click', function () {
-      taskItem.remove();
-      saveTasks();
-    });
-
-    taskItem.appendChild(taskSpan);
-    taskItem.appendChild(timestamp);
-    taskItem.appendChild(deleteBtn);
-    taskList.appendChild(taskItem);
-  });
-}
-
-// Move loadTasks() call to the top of the script execution
-document.addEventListener('DOMContentLoaded', loadTasks);
-
-    // Step 1: Get references to the form, input, and list
-    const taskForm = document.getElementById('task-form');
-    const taskInput = document.getElementById('task-input');
-    const taskList = document.getElementById('task-list');
-
-    // Step 2: Listen for form submission
-    taskForm.addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent page reload
-
-      const taskText = taskInput.value.trim(); // Get input text
-
-      if (taskText === '') return; // Do nothing if input is empty
-
-      // Step 3: Create task <li> element
+    savedTasks.forEach(task => {
       const taskItem = document.createElement('li');
       taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
 
-      // Step 4: Create a <span> to hold the task text
-      // Create a <span> for the task text
       const taskSpan = document.createElement('span');
-      taskSpan.textContent = taskText;
-      taskSpan.title = 'Click to mark complete'; // Tooltip hint for user
-      taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors'; // Make it look clickable
+      taskSpan.textContent = task.title;
+      taskSpan.title = 'Click to mark complete';
+      taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
 
-      // When the user clicks, toggle completed styling
-        taskSpan.addEventListener('click', function () {
-        taskSpan.classList.toggle('line-through');   // Strike-through when done
-        taskSpan.classList.toggle('text-gray-400');  // Make it look dim
-        taskSpan.classList.toggle('italic');         // Optional style
-        });
+      if (task.completed) {
+        taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
+      }
 
-
-      // Step 5: Create a delete button
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '❌'; // Button shows an "X"
-      deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
-
-      // Step 6: Add event listener to delete the task when clicked
-      deleteBtn.addEventListener('click', function () {
-        taskItem.remove(); // Remove the whole <li> from the list
-        saveTasks(); // Save the change
+      taskSpan.addEventListener('click', function () {
+        taskSpan.classList.toggle('line-through');
+        taskSpan.classList.toggle('text-gray-400');
+        taskSpan.classList.toggle('italic');
+        saveTasks();
       });
 
-// Step 7: Add the task text to the <li>
-  taskItem.appendChild(taskSpan);     // Add the task text
+      const timestamp = document.createElement('small');
+      timestamp.textContent = task.timestamp;
+      timestamp.className = 'text-sm text-gray-500 mt-1 block';
 
-// Step 7.5: Add a timestamp showing when the task was created
-const timestamp = document.createElement('small'); // Create a <small> element
-const now = new Date(); // Get current time
-timestamp.textContent = `Added: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-timestamp.className = 'text-sm text-gray-500 mt-1 block'; // Style it nicely
-taskItem.appendChild(timestamp); // Add it under the task text
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '❌';
+      deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+      deleteBtn.addEventListener('click', function () {
+        taskItem.remove();
+        saveTasks();
+      });
 
-taskItem.appendChild(deleteBtn);    // Add the delete button
-
-// Step 8: Add the <li> to the list
-taskList.appendChild(taskItem);
-saveTasks(); // 🧠 Save the task after adding
-
-      // Step 9: Clear the input box
-      taskInput.value = '';
+      taskItem.appendChild(taskSpan);
+      taskItem.appendChild(timestamp);
+      taskItem.appendChild(deleteBtn);
+      taskList.appendChild(taskItem);
     });
-  </script>
+  }
+
+  // Event listener for form submission
+  taskForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const newTask = taskInput.value.trim();
+    if (newTask === '') return;
+
+    try {
+      // Try to save to Supabase
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([{ title: newTask, completed: false }]);
+
+      if (error) throw error;
+
+      // Create the task UI elements
+      const taskItem = document.createElement('li');
+      taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
+
+      const taskSpan = document.createElement('span');
+      taskSpan.textContent = newTask;
+      taskSpan.title = 'Click to mark complete';
+      taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
+
+      const timestamp = document.createElement('small');
+      const now = new Date();
+      timestamp.textContent = `Added: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      timestamp.className = 'text-sm text-gray-500 mt-1 block';
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '❌';
+      deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+
+      // Add event listeners
+      taskSpan.addEventListener('click', function() {
+        taskSpan.classList.toggle('line-through');
+        taskSpan.classList.toggle('text-gray-400');
+        taskSpan.classList.toggle('italic');
+        saveTasks();
+      });
+
+      deleteBtn.addEventListener('click', function() {
+        taskItem.remove();
+        saveTasks();
+      });
+
+      // Assemble and append the task
+      taskItem.appendChild(taskSpan);
+      taskItem.appendChild(timestamp);
+      taskItem.appendChild(deleteBtn);
+      taskList.appendChild(taskItem);
+
+      // Save to local storage and clear input
+      saveTasks();
+      taskInput.value = '';
+    } catch (error) {
+      console.error('Error creating task:', error.message);
+    }
+  });
+</script>
 </body>
 </html>
