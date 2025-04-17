@@ -57,6 +57,9 @@
     -->
   </form>
 
+  <!-- Task Counter -->
+  <p id="task-counter" class="mt-4 text-sm text-gray-600"></p>
+
   <!-- Empty list where tasks will appear -->
   <ul id="task-list" class="space-y-2"></ul>
   <!-- List styling:
@@ -114,21 +117,55 @@
         console.groupEnd();
       });
 
+      function updateTaskCounter(tasks) {
+        const total = tasks.length;
+        const completed = tasks.filter(task => task.completed).length;
+        const counter = document.getElementById('task-counter');
+        counter.textContent = `${completed} of ${total} tasks completed`;
+      }
+
       async function loadTasks() {
         try {
+          console.group('Loading Tasks');
+          console.log('📚 Fetching tasks from Supabase...');
+          
           const { data: tasks, error } = await supabase
             .from('tasks')
             .select('*')
             .order('created_at', { ascending: false });
 
-          if (error) throw error;
+          if (error) {
+            console.error('❌ Error:', error.message);
+            throw error;
+          }
+
+          console.log('✅ Tasks fetched:', tasks?.length ?? 0);
           
           taskList.innerHTML = '';
-          tasks.forEach(task => createTaskElement(task));
+          if (tasks && tasks.length > 0) {
+            tasks.forEach(task => createTaskElement(task));
+            updateTaskCounter(tasks);  // Add counter update here
+          } else {
+            taskList.innerHTML = `
+              <li class="text-center text-gray-500 italic py-4">
+                No tasks yet. Add your first task above! ✨
+              </li>
+            `;
+          }
+          console.groupEnd();
         } catch (error) {
           console.error('Error loading tasks:', error);
+          taskList.innerHTML = `
+            <li class="text-center text-red-500 py-4">
+              Failed to load tasks. Please try again later.
+            </li>
+          `;
         }
       }
+
+      // Call loadTasks immediately and set up DOMContentLoaded listener
+      loadTasks();
+      document.addEventListener('DOMContentLoaded', loadTasks);
 
       function createTaskElement(task) {
         const taskItem = document.createElement('li');
@@ -165,6 +202,9 @@
             taskSpan.classList.toggle('text-gray-400');
             taskSpan.classList.toggle('italic');
             task.completed = !task.completed;
+
+            const { data: tasks } = await supabase.from('tasks').select('*');
+            updateTaskCounter(tasks);  // Add counter update here
           } catch (error) {
             console.error('Error updating task:', error);
           }
@@ -177,10 +217,20 @@
               .delete()
               .eq('id', task.id);
 
-            if (error) throw error;
+            if (error) {
+              console.error('Failed to delete task:', error.message);
+              alert('Failed to delete task. Please try again.');
+              return;
+            }
+
+            console.log('Task successfully deleted');
             taskItem.remove();
+
+            const { data: tasks } = await supabase.from('tasks').select('*');
+            updateTaskCounter(tasks);  // Add counter update here
           } catch (error) {
             console.error('Error deleting task:', error);
+            alert('An unexpected error occurred while deleting the task.');
           }
         });
 
