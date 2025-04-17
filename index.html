@@ -63,8 +63,8 @@
     -->
   </form>
 
-  <!-- Task Counter -->
-  <p id="task-counter" class="mt-4 text-sm text-gray-600"></p>
+  <!-- Task Counter - moved to bottom -->
+  <p id="task-counter" class="fixed bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-sm text-sm text-gray-600"></p>
 
   <!-- Empty list where tasks will appear -->
   <ul id="task-list" class="space-y-2"></ul>
@@ -174,12 +174,6 @@
           if (tasks && tasks.length > 0) {
             tasks.forEach(task => createTaskElement(task));
             updateTaskCounter(tasks);  // Add counter update here
-          } else {
-            taskList.innerHTML = `
-              <li class="text-center text-gray-500 italic py-4">
-                No tasks yet. Add your first task above! ✨
-              </li>
-            `;
           }
           console.groupEnd();
         } catch (error) {
@@ -198,8 +192,15 @@
 
       function createTaskElement(task) {
         const taskItem = document.createElement('li');
-        taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center';
+        taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center transition-transform duration-300 ease-in-out transform hover:scale-[1.02]';
         taskItem.dataset.id = task.id;
+        
+        // Add fade-in effect
+        taskItem.style.opacity = '0';
+        setTimeout(() => {
+          taskItem.style.opacity = '1';
+          taskItem.style.transition = 'opacity 0.5s ease-in-out';
+        }, 10);
 
         const taskSpan = document.createElement('span');
         taskSpan.textContent = task.title;
