@@ -5,10 +5,139 @@ try {
   const taskForm = document.getElementById('task-form');
   const taskInput = document.getElementById('task-input');
   const taskList = document.getElementById('task-list');
+  const authForms = document.getElementById('auth-forms');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const showSignupBtn = document.getElementById('show-signup');
+  const showLoginBtn = document.getElementById('show-login');
+  const userMenu = document.getElementById('user-menu');
+  const userEmail = document.getElementById('user-email');
+  const logoutButton = document.getElementById('logout-button');
 
-  if (!taskForm || !taskInput || !taskList) {
+  if (!taskForm || !taskInput || !taskList || !authForms || !loginForm || !signupForm) {
     throw new Error('Required DOM elements not found!');
   }
+
+  // Initially hide task form and show auth forms
+  taskForm.classList.add('hidden');
+  loginForm.classList.remove('hidden');
+  signupForm.classList.add('hidden');
+  authForms.classList.remove('hidden');
+
+  // Toggle between login and signup forms
+  showSignupBtn.addEventListener('click', () => {
+    loginForm.classList.add('hidden');
+    signupForm.classList.remove('hidden');
+  });
+
+  showLoginBtn.addEventListener('click', () => {
+    signupForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+  });
+
+  // Handle login
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+      showToast('Logging in...', 'info');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+      showToast('Logged in successfully!', 'success');
+      loginForm.reset();
+    } catch (error) {
+      console.error('Login error:', error);
+      showToast('Login failed: ' + error.message, 'error');
+    }
+  });
+
+  // Handle signup
+  signupForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+
+    try {
+      showToast('Creating your account...', 'info');
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            email_confirm: true,
+            confirmed_at: new Date().toISOString()
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('Email')) {
+          showToast('Please enter a valid email address', 'error');
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      if (data?.user) {
+        showToast('Account created successfully!', 'success');
+        signupForm.reset();
+        
+        // Hide auth forms and show user menu
+        authForms.classList.add('hidden');
+        userMenu.classList.remove('hidden');
+        userEmail.textContent = data.user.email;
+        taskForm.classList.remove('hidden');
+        loadTasks();
+      } else {
+        throw new Error('Failed to create account');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      showToast('Signup failed: ' + error.message, 'error');
+    }
+  });
+
+  // Handle logout
+  logoutButton.addEventListener('click', async () => {
+    try {
+      showToast('Logging out...', 'info');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      showToast('Logged out successfully!', 'success');
+    } catch (error) {
+      console.error('Logout error:', error);
+      showToast('Logout failed: ' + error.message, 'error');
+    }
+  });
+
+  // Handle auth state changes
+  supabase.auth.onAuthStateChange((event, session) => {
+    console.log('Auth event:', event);
+    if (session) {
+      // User is logged in
+      authForms.classList.add('hidden');
+      userMenu.classList.remove('hidden');
+      userEmail.textContent = session.user.email;
+      taskForm.classList.remove('hidden');
+      loadTasks(); // Reload tasks for the logged-in user
+    } else {
+      // User is logged out
+      authForms.classList.remove('hidden');
+      userMenu.classList.add('hidden');
+      userEmail.textContent = '';
+      taskForm.classList.add('hidden');
+      taskList.innerHTML = ''; // Clear tasks when logged out
+    }
+  });
 
   function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
@@ -50,9 +179,16 @@ try {
 
   async function loadTasks() {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        taskList.innerHTML = '';
+        return;
+      }
+
       const { data: tasks, error } = await supabase
         .from('tasks')
         .select('*')
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -131,10 +267,17 @@ try {
         if (error) throw error;
 
         taskItem.remove();
+        
+        // Get fresh task list and update counter
+        const { data: tasks, error: fetchError } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (fetchError) throw fetchError;
+        
+        updateTaskCounter(tasks || []);
         showToast('Task deleted!');
-
-        const { data: tasks } = await supabase.from('tasks').select('*');
-        updateTaskCounter(tasks);
       } catch (error) {
         console.error('Error deleting task:', error);
         showToast('Failed to delete task', 'error');
@@ -154,11 +297,18 @@ try {
     if (newTask === '') return;
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        showToast('Please login first', 'error');
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('tasks')
         .insert([{ 
           title: newTask,
-          completed: false
+          completed: false,
+          user_id: session.user.id  // Always require user_id
         }])
         .select();
 
@@ -169,8 +319,11 @@ try {
         taskInput.value = '';
         showToast('Task added!');
         
-        const { data: tasks } = await supabase.from('tasks').select('*');
-        updateTaskCounter(tasks);
+        const { data: tasks } = await supabase
+          .from('tasks')
+          .select('*')
+          .eq('user_id', session.user.id);
+        updateTaskCounter(tasks || []);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -178,9 +331,16 @@ try {
     }
   });
 
-  // Initial load
-  loadTasks();
-  
+  // Initial session check and load
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    authForms.classList.add('hidden');
+    userMenu.classList.remove('hidden');
+    userEmail.textContent = session.user.email;
+    taskForm.classList.remove('hidden');
+    loadTasks();
+  }
+
   // Set up real-time updates
   supabase
     .channel('tasks')
