@@ -1,9 +1,7 @@
 try {
-  console.log('%c Task Tracker Debug Mode', 'color: blue; font-size: 20px; font-weight: bold');
-  
   const { supabase } = await import('./supabase.js');
-  console.log('✅ Supabase import successful');
 
+  // DOM Elements
   const taskForm = document.getElementById('task-form');
   const taskInput = document.getElementById('task-input');
   const taskList = document.getElementById('task-list');
@@ -11,12 +9,24 @@ try {
   if (!taskForm || !taskInput || !taskList) {
     throw new Error('Required DOM elements not found!');
   }
-  console.log('✅ DOM elements loaded');
 
-  function showToast(message) {
+  function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
     const closeBtn = document.getElementById('toast-close');
+    
+    toast.classList.remove('bg-green-100', 'bg-red-100', 'bg-blue-100', 'text-green-800', 'text-red-800', 'text-blue-800');
+    
+    switch (type) {
+      case 'error':
+        toast.classList.add('bg-red-100', 'text-red-800');
+        break;
+      case 'info':
+        toast.classList.add('bg-blue-100', 'text-blue-800');
+        break;
+      default:
+        toast.classList.add('bg-green-100', 'text-green-800');
+    }
     
     toastMessage.textContent = message;
     toast.classList.remove('hidden');
@@ -28,7 +38,7 @@ try {
     };
 
     closeBtn.onclick = hideToast;
-    setTimeout(hideToast, 2000);
+    setTimeout(hideToast, duration);
   }
 
   function updateTaskCounter(tasks) {
@@ -40,27 +50,18 @@ try {
 
   async function loadTasks() {
     try {
-      console.group('Loading Tasks');
-      console.log('📚 Fetching tasks from Supabase...');
-      
       const { data: tasks, error } = await supabase
         .from('tasks')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('❌ Error:', error.message);
-        throw error;
-      }
-
-      console.log('✅ Tasks fetched:', tasks?.length ?? 0);
+      if (error) throw error;
       
       taskList.innerHTML = '';
       if (tasks && tasks.length > 0) {
         tasks.forEach(task => createTaskElement(task));
         updateTaskCounter(tasks);
       }
-      console.groupEnd();
     } catch (error) {
       console.error('Error loading tasks:', error);
       taskList.innerHTML = `
@@ -136,7 +137,7 @@ try {
         updateTaskCounter(tasks);
       } catch (error) {
         console.error('Error deleting task:', error);
-        alert('An unexpected error occurred while deleting the task.');
+        showToast('Failed to delete task', 'error');
       }
     });
 
@@ -173,14 +174,14 @@ try {
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to add task: ' + error.message);
+      showToast('Failed to add task: ' + error.message, 'error');
     }
   });
 
-  // Initial load and subscriptions
+  // Initial load
   loadTasks();
-  document.addEventListener('DOMContentLoaded', loadTasks);
   
+  // Set up real-time updates
   supabase
     .channel('tasks')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, loadTasks)
