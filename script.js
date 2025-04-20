@@ -68,7 +68,10 @@ try {
       
       const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: window.location.origin + window.location.pathname
+        }
       });
 
       if (error) {
@@ -81,15 +84,11 @@ try {
       }
 
       if (data?.user) {
-        showToast('Account created successfully!', 'success');
+        showToast('Account created! Please check your email to verify your account.', 'info');
         signupForm.reset();
-        
-        // Hide auth forms and show user menu
-        authForms.classList.add('hidden');
-        userMenu.classList.remove('hidden');
-        userEmail.textContent = data.user.email;
-        taskForm.classList.remove('hidden');
-        loadTasks();
+        // Don't automatically log in - wait for email verification
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
       } else {
         throw new Error('Failed to create account');
       }
