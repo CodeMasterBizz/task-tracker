@@ -13,15 +13,6 @@ try {
   const userMenu = document.getElementById('user-menu');
   const userEmail = document.getElementById('user-email');
   const logoutButton = document.getElementById('logout-button');
-  const taskDashboard = document.getElementById('task-dashboard');
-  const streakCounter = document.getElementById('streak-counter');
-  const progressBar = document.querySelector('.progress-bar-fill');
-  const progressText = document.querySelector('.progress-bar + div');
-  
-  let userLevel = 1;
-  let tasksCompleted = 0;
-  let streak = 0;
-  const TASKS_PER_LEVEL = 5;
 
   if (!taskForm || !taskInput || !taskList || !authForms || !loginForm || !signupForm) {
     throw new Error('Required DOM elements not found!');
@@ -128,18 +119,14 @@ try {
       authForms.classList.add('hidden');
       userMenu.classList.remove('hidden');
       userEmail.textContent = session.user.email;
-      taskDashboard.classList.remove('hidden');
       taskForm.classList.remove('hidden');
-      streakCounter.classList.remove('hidden');
       loadTasks(); // Reload tasks for the logged-in user
     } else {
       // User is logged out
       authForms.classList.remove('hidden');
       userMenu.classList.add('hidden');
       userEmail.textContent = '';
-      taskDashboard.classList.add('hidden');
       taskForm.classList.add('hidden');
-      streakCounter.classList.add('hidden');
       taskList.innerHTML = ''; // Clear tasks when logged out
     }
   });
@@ -213,70 +200,35 @@ try {
     }
   }
 
-  function updateProgress() {
-    const percentage = (tasksCompleted % TASKS_PER_LEVEL) * (100 / TASKS_PER_LEVEL);
-    progressBar.style.width = `${percentage}%`;
-    progressText.innerHTML = `
-      <span>${tasksCompleted % TASKS_PER_LEVEL}/${TASKS_PER_LEVEL} tasks completed</span>
-      <span>Next level: ${TASKS_PER_LEVEL - (tasksCompleted % TASKS_PER_LEVEL)} tasks</span>
-    `;
-
-    // Check for level up
-    const newLevel = Math.floor(tasksCompleted / TASKS_PER_LEVEL) + 1;
-    if (newLevel > userLevel) {
-      userLevel = newLevel;
-      document.querySelector('#user-menu .text-xs').textContent = `Level ${userLevel} Task Master`;
-      document.querySelector('.progress-bar').parentElement.querySelector('span').textContent = `Level ${userLevel}`;
-      celebrateLevelUp();
-    }
-  }
-
-  function celebrateLevelUp() {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-    showToast('🎉 Level Up! Keep up the great work!', 'success', 5000);
-  }
-
   function createTaskElement(task) {
     const taskItem = document.createElement('li');
-    taskItem.className = 'task-item bg-white p-4 rounded-xl shadow-md flex justify-between items-center transition-all duration-300 hover:shadow-lg';
+    taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center transition-transform duration-300 ease-in-out transform hover:scale-[1.02]';
     taskItem.dataset.id = task.id;
     
-    const leftSection = document.createElement('div');
-    leftSection.className = 'flex items-center gap-3';
-    
-    const checkbox = document.createElement('button');
-    checkbox.className = 'w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center transition-colors';
-    
-    const taskContent = document.createElement('div');
-    taskContent.className = 'flex flex-col';
-    
-    const taskTitle = document.createElement('span');
-    taskTitle.textContent = task.title;
-    taskTitle.className = 'font-medium transition-colors';
-    
-    const timestamp = document.createElement('small');
-    timestamp.textContent = new Date(task.created_at).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-    timestamp.className = 'text-xs text-gray-500';
+    taskItem.style.opacity = '0';
+    setTimeout(() => {
+      taskItem.style.opacity = '1';
+      taskItem.style.transition = 'opacity 0.5s ease-in-out';
+    }, 10);
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.innerHTML = '&times;';
-    deleteBtn.className = 'ml-4 text-gray-400 hover:text-red-500 text-2xl font-bold transition-colors';
+    const taskSpan = document.createElement('span');
+    taskSpan.textContent = task.title;
+    taskSpan.title = 'Click to mark complete';
+    taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
 
     if (task.completed) {
-      taskItem.classList.add('completed');
-      checkbox.classList.add('bg-[#58CC02]');
-      checkbox.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
-      taskTitle.classList.add('line-through', 'text-gray-400');
+      taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
     }
 
-    checkbox.addEventListener('click', async () => {
+    const timestamp = document.createElement('small');
+    timestamp.textContent = new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    timestamp.className = 'text-sm text-gray-500 mt-1 block';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '❌';
+    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+
+    taskSpan.addEventListener('click', async () => {
       try {
         const { error } = await supabase
           .from('tasks')
@@ -285,33 +237,15 @@ try {
 
         if (error) throw error;
 
+        taskSpan.classList.toggle('line-through');
+        taskSpan.classList.toggle('text-gray-400');
+        taskSpan.classList.toggle('italic');
         task.completed = !task.completed;
-        if (task.completed) {
-          tasksCompleted++;
-          checkbox.classList.add('bg-[#58CC02]');
-          checkbox.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
-          taskTitle.classList.add('line-through', 'text-gray-400');
-          taskItem.classList.add('completed');
-          
-          // Play success sound and show mini confetti
-          confetti({
-            particleCount: 30,
-            spread: 20,
-            origin: { y: 0.8 }
-          });
-        } else {
-          tasksCompleted = Math.max(0, tasksCompleted - 1);
-          checkbox.classList.remove('bg-[#58CC02]');
-          checkbox.innerHTML = '';
-          taskTitle.classList.remove('line-through', 'text-gray-400');
-          taskItem.classList.remove('completed');
-        }
 
-        updateProgress();
-        updateTaskCounter();
+        const { data: tasks } = await supabase.from('tasks').select('*');
+        updateTaskCounter(tasks);
       } catch (error) {
         console.error('Error updating task:', error);
-        showToast('Failed to update task', 'error');
       }
     });
 
@@ -324,13 +258,17 @@ try {
 
         if (error) throw error;
 
-        taskItem.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => {
-          taskItem.remove();
-          updateProgress();
-          updateTaskCounter();
-        }, 200);
+        taskItem.remove();
         
+        // Get fresh task list and update counter
+        const { data: tasks, error: fetchError } = await supabase
+          .from('tasks')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (fetchError) throw fetchError;
+        
+        updateTaskCounter(tasks || []);
         showToast('Task deleted!');
       } catch (error) {
         console.error('Error deleting task:', error);
@@ -338,26 +276,10 @@ try {
       }
     });
 
-    taskContent.appendChild(taskTitle);
-    taskContent.appendChild(timestamp);
-    leftSection.appendChild(checkbox);
-    leftSection.appendChild(taskContent);
-    taskItem.appendChild(leftSection);
+    taskItem.appendChild(taskSpan);
+    taskItem.appendChild(timestamp);
     taskItem.appendChild(deleteBtn);
     taskList.appendChild(taskItem);
-
-    // Animate in
-    requestAnimationFrame(() => {
-      taskItem.classList.add('scale-100', 'opacity-100');
-    });
-  }
-
-  // Update task counter function
-  function updateTaskCounter() {
-    const tasks = document.querySelectorAll('.task-item');
-    const completed = document.querySelectorAll('.task-item.completed').length;
-    const total = tasks.length;
-    streakCounter.textContent = `🔥 ${streak} day streak`;
   }
 
   // Form submission handler

@@ -6,134 +6,103 @@
   <title>Task Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 font-sans min-h-screen">
+<body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
   <!-- Toast notification -->
-  <div id="toast" class="fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg hidden transition-all duration-500 flex items-center z-50 transform translate-y-0">
-    <span id="toast-message" class="font-medium"></span>
+  <div id="toast" class="fixed top-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow hidden transition-opacity duration-500 flex items-center z-50">
+    <span id="toast-message"></span>
     <button id="toast-close" class="ml-3 text-gray-500 hover:text-gray-700">✕</button>
   </div>
 
   <!-- Main container -->
   <div class="max-w-4xl mx-auto p-6">
     <!-- Header with user section -->
-    <div class="flex justify-between items-center mb-8">
-      <div class="flex items-center space-x-4">
-        <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">✨ Task Master</h1>
-        <div id="streak-counter" class="task-streak hidden px-4 py-2 rounded-full text-dark-color font-medium">
-          🔥 0 day streak
-        </div>
-      </div>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">📝 Task Tracker</h1>
       
       <!-- User menu (when logged in) -->
-      <div id="user-menu" class="hidden flex items-center space-x-4">
-        <div class="flex flex-col items-end">
-          <span id="user-email" class="text-sm text-gray-600"></span>
-          <div class="text-xs text-gray-500">Level 1 Task Master</div>
-        </div>
-        <button id="logout-button" class="bg-white text-red-600 px-4 py-2 rounded-full hover:bg-red-50 transition-colors shadow-sm font-medium">Logout</button>
+      <div id="user-menu" class="hidden">
+        <span id="user-email" class="mr-4 text-gray-600"></span>
+        <button id="logout-button" class="text-red-600 hover:underline">Logout</button>
       </div>
     </div>
 
     <!-- Authentication Forms Section -->
     <div id="auth-forms" class="flex flex-col items-center justify-center min-h-[60vh]">
-      <div class="w-full max-w-md auth-card rounded-2xl shadow-xl p-8">
+      <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8">
         <!-- Login Form -->
         <form id="login-form">
-          <h2 class="text-3xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">Welcome Back!</h2>
-          <div class="space-y-6">
+          <h2 class="text-2xl font-bold text-center mb-6">Welcome Back</h2>
+          <div class="space-y-4">
             <div>
               <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input type="email" id="login-email" placeholder="Enter your email" 
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all" required>
+                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
             <div>
               <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <input type="password" id="login-password" placeholder="Enter your password" 
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all" required>
+                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
             <button type="submit" 
-                    class="w-full bg-[#58CC02] text-white py-3 rounded-xl hover:bg-[#47a601] transition-colors font-bold text-lg shadow-lg shadow-green-200">
-              Login to Continue
+                    class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">
+              Login
             </button>
             <p class="text-center text-sm text-gray-600">
               Don't have an account? 
-              <button type="button" id="show-signup" class="text-[#58CC02] hover:text-[#47a601] font-medium">Create One</button>
+              <button type="button" id="show-signup" class="text-blue-600 hover:underline">Sign Up</button>
             </p>
           </div>
         </form>
 
         <!-- Signup Form -->
         <form id="signup-form" class="hidden">
-          <h2 class="text-3xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">Start Your Journey</h2>
-          <div class="space-y-6">
+          <h2 class="text-2xl font-bold text-center mb-6">Create Account</h2>
+          <div class="space-y-4">
             <div>
               <label for="signup-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input type="email" id="signup-email" placeholder="Enter your email" 
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all" required>
+                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
             <div>
               <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <input type="password" id="signup-password" placeholder="Choose a password" 
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all" required>
+                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
             <button type="submit" 
-                    class="w-full bg-[#58CC02] text-white py-3 rounded-xl hover:bg-[#47a601] transition-colors font-bold text-lg shadow-lg shadow-green-200">
-              Create Account
+                    class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors">
+              Sign Up
             </button>
             <p class="text-center text-sm text-gray-600">
               Already have an account? 
-              <button type="button" id="show-login" class="text-[#58CC02] hover:text-[#47a601] font-medium">Login</button>
+              <button type="button" id="show-login" class="text-blue-600 hover:underline">Login</button>
             </p>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Task Dashboard -->
-    <div id="task-dashboard" class="hidden space-y-8">
-      <!-- Progress Section -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold text-gray-800">Daily Progress</h3>
-          <span class="text-sm text-gray-500">Level 1</span>
-        </div>
-        <div class="progress-bar mb-2">
-          <div class="progress-bar-fill" style="width: 0%"></div>
-        </div>
-        <div class="flex justify-between text-sm text-gray-600">
-          <span>0/5 tasks completed</span>
-          <span>Next level: 5 tasks</span>
-        </div>
-      </div>
+    <!-- Task Input Form -->
+    <form id="task-form" class="hidden flex items-center gap-2 mb-6 bg-white p-4 rounded-lg shadow-sm">
+      <input 
+        type="text" 
+        id="task-input" 
+        placeholder="Enter a task..." 
+        class="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button 
+        type="submit" 
+        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+      >
+        Add Task
+      </button>
+    </form>
 
-      <!-- Task Input Form -->
-      <form id="task-form" class="hidden">
-        <div class="bg-white rounded-2xl shadow-lg p-6">
-          <div class="flex items-center gap-4">
-            <input 
-              type="text" 
-              id="task-input" 
-              placeholder="What do you want to accomplish?" 
-              class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all"
-            />
-            <button 
-              type="submit" 
-              class="bg-[#58CC02] text-white px-8 py-3 rounded-xl hover:bg-[#47a601] transition-colors font-bold shadow-lg shadow-green-200"
-            >
-              Add Task
-            </button>
-          </div>
-        </div>
-      </form>
+    <!-- Task Counter -->
+    <p id="task-counter" class="fixed bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-sm text-sm text-gray-600"></p>
 
-      <!-- Task List -->
-      <div class="space-y-4">
-        <h3 class="text-xl font-bold text-gray-800 mb-4">Your Tasks</h3>
-        <ul id="task-list" class="space-y-3"></ul>
-      </div>
-    </div>
+    <!-- Task List -->
+    <ul id="task-list" class="space-y-2"></ul>
   </div>
 
   <script type="module" src="script.js"></script>
