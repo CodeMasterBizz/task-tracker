@@ -5,76 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Task Tracker</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
+<body class="bg-white text-gray-900 font-['Inter'] min-h-screen gradient-background">
   <!-- Toast notification -->
-  <div id="toast" class="fixed top-4 right-4 bg-green-100 text-green-800 px-4 py-2 rounded shadow hidden transition-opacity duration-500 flex items-center z-50">
+  <div id="toast" class="fixed top-4 right-4 bg-[#E7FFF1] text-[#00C805] px-4 py-2 rounded-lg shadow-md hidden transition-opacity duration-500 flex items-center z-50">
     <span id="toast-message"></span>
     <button id="toast-close" class="ml-3 text-gray-500 hover:text-gray-700">✕</button>
   </div>
 
   <!-- Main container -->
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-4xl mx-auto p-8">
     <!-- Header with user section -->
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">📝 Task Tracker</h1>
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold">📝 Task Tracker</h1>
       
       <!-- User menu (when logged in) -->
       <div id="user-menu" class="hidden">
-        <span id="user-email" class="mr-4 text-gray-600"></span>
-        <button id="logout-button" class="text-red-600 hover:underline">Logout</button>
+        <span id="user-email" class="mr-4 text-gray-700"></span>
+        <button id="logout-button" class="text-[#00C805] hover:text-[#00A804] transition-colors">Logout</button>
       </div>
     </div>
 
     <!-- Authentication Forms Section -->
-    <div id="auth-forms" class="flex flex-col items-center justify-center min-h-[60vh]">
-      <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8">
+    <div id="auth-forms" class="flex flex-col items-center justify-center min-h-[70vh] relative">
+      <!-- Decorative shapes -->
+      <div class="decorative-shape top-0 right-0"></div>
+      <div class="decorative-shape bottom-0 left-0" style="animation-delay: -3s;"></div>
+      
+      <div class="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-10" style="animation: fadeIn 0.6s ease-out;">
         <!-- Login Form -->
         <form id="login-form">
-          <h2 class="text-2xl font-bold text-center mb-6">Welcome Back</h2>
-          <div class="space-y-4">
-            <div>
-              <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" id="login-email" placeholder="Enter your email" 
-                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <h2 class="text-3xl font-bold text-center mb-8 tracking-tight">Welcome Back</h2>
+          <div class="space-y-6">
+            <div class="input-float-label">
+              <input type="email" id="login-email" placeholder=" " 
+                     class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C805] focus:border-transparent transition-all bg-white/50" required>
+              <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
             </div>
-            <div>
-              <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" id="login-password" placeholder="Enter your password" 
-                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <div class="input-float-label">
+              <input type="password" id="login-password" placeholder=" " 
+                     class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C805] focus:border-transparent transition-all bg-white/50" required>
+              <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
             </div>
             <button type="submit" 
-                    class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    class="w-full bg-[#00C805] text-white py-3 rounded-lg hover:bg-[#00A804] transition-all duration-300 font-medium hover:shadow-lg hover:shadow-[#00C805]/20 transform hover:-translate-y-0.5">
               Login
             </button>
             <p class="text-center text-sm text-gray-600">
               Don't have an account? 
-              <button type="button" id="show-signup" class="text-blue-600 hover:underline">Sign Up</button>
+              <button type="button" id="show-signup" class="text-[#00C805] hover:text-[#00A804] transition-colors font-medium">Sign Up</button>
             </p>
           </div>
         </form>
 
         <!-- Signup Form -->
         <form id="signup-form" class="hidden">
-          <h2 class="text-2xl font-bold text-center mb-6">Create Account</h2>
-          <div class="space-y-4">
-            <div>
-              <label for="signup-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" id="signup-email" placeholder="Enter your email" 
-                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <h2 class="text-3xl font-bold text-center mb-8 tracking-tight">Create Account</h2>
+          <div class="space-y-6">
+            <div class="input-float-label">
+              <input type="email" id="signup-email" placeholder=" " 
+                     class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C805] focus:border-transparent transition-all bg-white/50" required>
+              <label for="signup-email" class="text-sm font-medium text-gray-700">Email</label>
             </div>
-            <div>
-              <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" id="signup-password" placeholder="Choose a password" 
-                     class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <div class="input-float-label">
+              <input type="password" id="signup-password" placeholder=" " 
+                     class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00C805] focus:border-transparent transition-all bg-white/50" required>
+              <label for="signup-password" class="text-sm font-medium text-gray-700">Password</label>
             </div>
             <button type="submit" 
-                    class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors">
+                    class="w-full bg-[#00C805] text-white py-3 rounded-lg hover:bg-[#00A804] transition-all duration-300 font-medium hover:shadow-lg hover:shadow-[#00C805]/20 transform hover:-translate-y-0.5">
               Sign Up
             </button>
             <p class="text-center text-sm text-gray-600">
               Already have an account? 
-              <button type="button" id="show-login" class="text-blue-600 hover:underline">Login</button>
+              <button type="button" id="show-login" class="text-[#00C805] hover:text-[#00A804] transition-colors font-medium">Login</button>
             </p>
           </div>
         </form>
