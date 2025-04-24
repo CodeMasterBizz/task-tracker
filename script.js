@@ -120,6 +120,7 @@ try {
       userMenu.classList.remove('hidden');
       userEmail.textContent = session.user.email;
       taskForm.classList.remove('hidden');
+      document.getElementById('task-counter').classList.remove('hidden');
       loadTasks(); // Reload tasks for the logged-in user
     } else {
       // User is logged out
@@ -127,6 +128,7 @@ try {
       userMenu.classList.add('hidden');
       userEmail.textContent = '';
       taskForm.classList.add('hidden');
+      document.getElementById('task-counter').classList.add('hidden');
       taskList.innerHTML = ''; // Clear tasks when logged out
     }
   });
