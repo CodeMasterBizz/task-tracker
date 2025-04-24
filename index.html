@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-white text-gray-900 font-['Inter'] min-h-screen gradient-background">
+<body class="bg-white text-gray-900 font-['Inter'] min-h-screen">
   <!-- Toast notification -->
   <div id="toast" class="fixed top-4 right-4 bg-[#E7FFF1] text-[#00C805] px-4 py-2 rounded-lg shadow-md hidden transition-opacity duration-500 flex items-center z-50">
     <span id="toast-message"></span>
@@ -28,12 +28,8 @@
     </div>
 
     <!-- Authentication Forms Section -->
-    <div id="auth-forms" class="flex flex-col items-center justify-center min-h-[70vh] relative">
-      <!-- Decorative shapes -->
-      <div class="decorative-shape top-0 right-0"></div>
-      <div class="decorative-shape bottom-0 left-0" style="animation-delay: -3s;"></div>
-      
-      <div class="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-10" style="animation: fadeIn 0.6s ease-out;">
+    <div id="auth-forms" class="flex flex-col items-center justify-center min-h-[70vh]">
+      <div class="w-full max-w-md bg-white/80 backdrop-blur-sm rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-10">
         <!-- Login Form -->
         <form id="login-form">
           <h2 class="text-3xl font-bold text-center mb-8 tracking-tight">Welcome Back</h2>
@@ -87,26 +83,33 @@
     </div>
 
     <!-- Task Input Form -->
-    <form id="task-form" class="hidden flex items-center gap-2 mb-6 bg-white p-4 rounded-lg shadow-sm">
-      <input 
-        type="text" 
-        id="task-input" 
-        placeholder="Enter a task..." 
-        class="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button 
-        type="submit" 
-        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
-      >
-        Add Task
-      </button>
+    <form id="task-form" class="hidden mb-8">
+      <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 transition-all hover:shadow-xl">
+        <div class="flex items-center gap-4">
+          <input 
+            type="text" 
+            id="task-input" 
+            placeholder="What needs to be done?" 
+            class="flex-1 px-4 py-3 bg-white/50 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00C805] focus:border-transparent transition-all text-gray-700"
+          />
+          <button 
+            type="submit" 
+            class="bg-[#00C805] text-white px-8 py-3 rounded-lg hover:bg-[#00A804] transition-all duration-300 font-medium hover:shadow-lg hover:shadow-[#00C805]/20 transform hover:-translate-y-0.5 flex items-center"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add Task
+          </button>
+        </div>
+      </div>
     </form>
 
     <!-- Task Counter -->
-    <p id="task-counter" class="fixed bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-sm text-sm text-gray-600"></p>
+    <div id="task-counter" class="fixed bottom-4 right-4 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg text-sm text-gray-700 font-medium transition-all hover:shadow-xl"></div>
 
     <!-- Task List -->
-    <ul id="task-list" class="space-y-2"></ul>
+    <ul id="task-list" class="space-y-4"></ul>
   </div>
 
   <script src="https://cdn.tailwindcss.com"></script>

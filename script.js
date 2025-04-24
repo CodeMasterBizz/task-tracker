@@ -202,33 +202,43 @@ try {
 
   function createTaskElement(task) {
     const taskItem = document.createElement('li');
-    taskItem.className = 'bg-white p-3 rounded shadow flex justify-between items-center transition-transform duration-300 ease-in-out transform hover:scale-[1.02]';
+    taskItem.className = 'bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg flex justify-between items-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group';
     taskItem.dataset.id = task.id;
     
     taskItem.style.opacity = '0';
     setTimeout(() => {
       taskItem.style.opacity = '1';
-      taskItem.style.transition = 'opacity 0.5s ease-in-out';
+      taskItem.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
     }, 10);
+
+    const leftSection = document.createElement('div');
+    leftSection.className = 'flex items-center gap-4';
+
+    const checkbox = document.createElement('button');
+    checkbox.className = `w-6 h-6 rounded-full border-2 border-[#00C805] flex items-center justify-center transition-all ${task.completed ? 'bg-[#00C805]' : 'hover:bg-[#00C805]/10'}`;
+    checkbox.innerHTML = task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : '';
+
+    const taskContent = document.createElement('div');
+    taskContent.className = 'flex flex-col';
 
     const taskSpan = document.createElement('span');
     taskSpan.textContent = task.title;
-    taskSpan.title = 'Click to mark complete';
-    taskSpan.className = 'cursor-pointer hover:text-blue-500 transition-colors';
-
-    if (task.completed) {
-      taskSpan.classList.add('line-through', 'text-gray-400', 'italic');
-    }
+    taskSpan.className = `text-gray-700 transition-all ${task.completed ? 'line-through text-gray-400' : 'group-hover:text-[#00C805]'}`;
 
     const timestamp = document.createElement('small');
-    timestamp.textContent = new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    timestamp.className = 'text-sm text-gray-500 mt-1 block';
+    timestamp.textContent = new Date(task.created_at).toLocaleString([], { 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    timestamp.className = 'text-sm text-gray-400';
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = '❌';
-    deleteBtn.className = 'ml-4 text-red-500 hover:text-red-700 text-lg';
+    deleteBtn.className = 'ml-4 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0';
+    deleteBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>';
 
-    taskSpan.addEventListener('click', async () => {
+    checkbox.addEventListener('click', async () => {
       try {
         const { error } = await supabase
           .from('tasks')
@@ -237,10 +247,11 @@ try {
 
         if (error) throw error;
 
+        task.completed = !task.completed;
+        checkbox.innerHTML = task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : '';
+        checkbox.classList.toggle('bg-[#00C805]');
         taskSpan.classList.toggle('line-through');
         taskSpan.classList.toggle('text-gray-400');
-        taskSpan.classList.toggle('italic');
-        task.completed = !task.completed;
 
         const { data: tasks } = await supabase.from('tasks').select('*');
         updateTaskCounter(tasks);
@@ -276,8 +287,11 @@ try {
       }
     });
 
-    taskItem.appendChild(taskSpan);
-    taskItem.appendChild(timestamp);
+    taskContent.appendChild(taskSpan);
+    taskContent.appendChild(timestamp);
+    leftSection.appendChild(checkbox);
+    leftSection.appendChild(taskContent);
+    taskItem.appendChild(leftSection);
     taskItem.appendChild(deleteBtn);
     taskList.appendChild(taskItem);
   }
