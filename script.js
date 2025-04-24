@@ -70,7 +70,7 @@ try {
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin + window.location.pathname
+          emailRedirectTo: 'https://codemasterbizz.github.io/task-tracker/'
         }
       });
 
