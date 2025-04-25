@@ -202,42 +202,91 @@ try {
     }
   }
 
+  function isOverdue(dueDate) {
+    const now = new Date();
+    const taskDate = new Date(dueDate);
+    // Compare only the date portions
+    return new Date(taskDate.getFullYear(), taskDate.getMonth(), taskDate.getDate()) <
+           new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  function formatDueDate(dueDate) {
+    const date = new Date(dueDate);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Compare only the date portions
+    const dateStr = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toDateString();
+    const todayStr = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toDateString();
+    const tomorrowStr = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate()).toDateString();
+    
+    if (dateStr === todayStr) {
+      return 'Today';
+    } else if (dateStr === tomorrowStr) {
+      return 'Tomorrow';
+    } else {
+      return date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric',
+        year: today.getFullYear() !== date.getFullYear() ? 'numeric' : undefined
+      });
+    }
+  }
+
   function createTaskElement(task) {
     const taskItem = document.createElement('li');
-    taskItem.className = 'bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg flex justify-between items-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group';
+    const isTaskOverdue = !task.completed && isOverdue(task.due_date);
+    
+    taskItem.className = `bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow flex justify-between items-center transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group
+      ${isTaskOverdue ? 'border border-red-500' : ''}`;
     taskItem.dataset.id = task.id;
     
     taskItem.style.opacity = '0';
     setTimeout(() => {
       taskItem.style.opacity = '1';
-      taskItem.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+      taskItem.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
     }, 10);
 
     const leftSection = document.createElement('div');
-    leftSection.className = 'flex items-center gap-4';
+    leftSection.className = 'flex items-center gap-3';
 
     const checkbox = document.createElement('button');
-    checkbox.className = `w-6 h-6 rounded-full border-2 border-[#00C805] flex items-center justify-center transition-all ${task.completed ? 'bg-[#00C805]' : 'hover:bg-[#00C805]/10'}`;
-    checkbox.innerHTML = task.completed ? '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : '';
+    checkbox.className = `w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all 
+      ${task.completed 
+        ? 'bg-[#00C805] border-[#00C805]' 
+        : isTaskOverdue 
+          ? 'border-red-500 hover:bg-red-500/10' 
+          : 'border-[#00C805] hover:bg-[#00C805]/10'}`;
+    checkbox.innerHTML = task.completed ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : '';
 
     const taskContent = document.createElement('div');
-    taskContent.className = 'flex flex-col';
+    taskContent.className = 'flex flex-col gap-1';
 
     const taskSpan = document.createElement('span');
     taskSpan.textContent = task.title;
-    taskSpan.className = `text-gray-700 transition-all ${task.completed ? 'line-through text-gray-400' : 'group-hover:text-[#00C805]'}`;
+    taskSpan.className = `transition-all ${
+      task.completed 
+        ? 'line-through text-gray-400' 
+        : isTaskOverdue 
+          ? 'text-red-500 group-hover:text-red-600' 
+          : 'text-gray-700 group-hover:text-[#00C805]'
+    }`;
 
-    const timestamp = document.createElement('small');
-    timestamp.textContent = new Date(task.created_at).toLocaleString([], { 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit', 
-      minute: '2-digit'
-    });
-    timestamp.className = 'text-sm text-gray-400';
+    const dueDate = document.createElement('small');
+    dueDate.textContent = formatDueDate(task.due_date);
+    dueDate.className = `text-sm ${
+      task.completed 
+        ? 'text-gray-400' 
+        : isTaskOverdue 
+          ? 'text-red-500' 
+          : 'text-gray-400'
+    }`;
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'ml-4 text-gray-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0';
+    deleteBtn.className = `ml-4 transition-colors opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 ${
+      isTaskOverdue ? 'text-red-500 hover:text-red-700' : 'text-gray-400 hover:text-red-500'
+    }`;
     deleteBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>';
 
     checkbox.addEventListener('click', async () => {
@@ -290,7 +339,7 @@ try {
     });
 
     taskContent.appendChild(taskSpan);
-    taskContent.appendChild(timestamp);
+    taskContent.appendChild(dueDate);
     leftSection.appendChild(checkbox);
     leftSection.appendChild(taskContent);
     taskItem.appendChild(leftSection);
@@ -302,7 +351,12 @@ try {
   taskForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const newTask = taskInput.value.trim();
+    const dueDate = document.getElementById('due-date-input').value;
     if (newTask === '') return;
+    if (!dueDate) {
+      showToast('Please select a due date', 'error');
+      return;
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -311,12 +365,17 @@ try {
         return;
       }
       
+      // Fix timezone handling by using the date string directly
+      const [year, month, day] = dueDate.split('-').map(Number);
+      const selectedDate = new Date(year, month - 1, day, 12, 0, 0);
+      
       const { data, error } = await supabase
         .from('tasks')
         .insert([{ 
           title: newTask,
           completed: false,
-          user_id: session.user.id  // Always require user_id
+          user_id: session.user.id,
+          due_date: selectedDate.toISOString()
         }])
         .select();
 
@@ -325,6 +384,7 @@ try {
       if (data && data[0]) {
         createTaskElement(data[0]);
         taskInput.value = '';
+        document.getElementById('due-date-input').value = '';
         showToast('Task added!');
         
         const { data: tasks } = await supabase
