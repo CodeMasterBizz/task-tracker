@@ -132,7 +132,7 @@ try {
         email,
         password,
         options: {
-          emailRedirectTo: 'https://codemasterbizz.github.io/task-tracker/'
+          emailRedirectTo: window.location.origin
         }
       });
 
