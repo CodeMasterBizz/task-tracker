@@ -1,6 +1,12 @@
 try {
   const { supabase } = await import('./supabase.js');
 
+  // Determine if we're in production or development
+  const isProd = window.location.hostname.includes('github.io');
+  const siteUrl = isProd 
+    ? 'https://codemasterbizz.github.io/task-tracker/'
+    : window.location.origin;
+
   // DOM Elements
   const taskForm = document.getElementById('task-form');
   const taskInput = document.getElementById('task-input');
@@ -132,7 +138,7 @@ try {
         email,
         password,
         options: {
-          emailRedirectTo: 'https://codemasterbizz.github.io/task-tracker/'
+          emailRedirectTo: siteUrl
         }
       });
 
